@@ -64,3 +64,44 @@ npm install
 npm test
 npm run verify
 ```
+
+Pull requests and pushes to `main` run the full verification suite on Node.js
+22.20 and 24, plus the runtime tests on Bun 1.4.
+
+## Releases
+
+npm releases use [trusted publishing](https://docs.npmjs.com/trusted-publishers/)
+from GitHub Actions. The release workflow accepts only a `vX.Y.Z` tag that
+matches the committed `package.json` version and points to a commit contained
+in `main`. It repeats the Node and Bun verification before publishing. npm uses
+the workflow's short-lived OIDC identity and adds provenance automatically; no
+long-lived npm token is stored in GitHub.
+
+Configure the npm package's GitHub Actions trusted publisher once with these
+exact values:
+
+- Organization or user: `lunarmoon26`
+- Repository: `agent-skill-runtime`
+- Workflow filename: `npm-publish.yml`
+- Environment: none
+- Allowed action: direct `npm publish`
+
+For each release:
+
+1. Update `package.json` and `package-lock.json` to the same new version in a
+   reviewed change, then merge it to `main`.
+2. Tag the merged `main` commit and push the tag:
+
+   ```sh
+   git tag vX.Y.Z
+   git push origin vX.Y.Z
+   ```
+
+The tag starts `.github/workflows/npm-publish.yml`. Branch pushes and pull
+requests never publish. After the first trusted release succeeds, configure
+the npm package to require two-factor authentication and disallow traditional
+publish tokens.
+
+Version `0.1.0` was published manually before release automation existed. Do
+not create a retrospective `v0.1.0` tag after this workflow reaches `main`; the
+first automated release must use a new package version and matching tag.
