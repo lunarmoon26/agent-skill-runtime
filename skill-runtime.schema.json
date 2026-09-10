@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/lunarmoon26/agent-skill-runtime/main/skill-runtime.schema.json",
+  "title": "Agent Skill Runtime Manifest",
+  "type": "object",
+  "properties": {
+    "$schema": { "type": "string" },
+    "manifestVersion": { "const": 1 },
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "maxLength": 80
+    },
+    "tools": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/tool" }
+    }
+  },
+  "required": ["manifestVersion", "name", "tools"],
+  "additionalProperties": false,
+  "$defs": {
+    "tool": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,63}$"
+        },
+        "description": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "inputSchema": { "$ref": "#/$defs/jsonSchema" },
+        "outputSchema": { "$ref": "#/$defs/jsonSchema" },
+        "entrypoint": { "$ref": "#/$defs/entrypoint" },
+        "capabilities": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": ["filesystem-read", "filesystem-write", "network", "process"]
+          }
+        },
+        "annotations": { "$ref": "#/$defs/annotations" },
+        "limits": { "$ref": "#/$defs/limits" }
+      },
+      "required": ["title", "name", "description", "inputSchema", "entrypoint"],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "type": "object",
+      "properties": {
+        "readOnlyHint": { "type": "boolean" },
+        "destructiveHint": { "type": "boolean" },
+        "idempotentHint": { "type": "boolean" },
+        "openWorldHint": { "type": "boolean" }
+      },
+      "required": ["readOnlyHint", "destructiveHint", "idempotentHint", "openWorldHint"],
+      "additionalProperties": false
+    },
+    "entrypoint": {
+      "type": "object",
+      "properties": {
+        "engine": { "enum": ["node", "python", "python-uv", "wasmtime"] },
+        "path": { "type": "string", "minLength": 1 },
+        "args": {
+          "type": "array",
+          "items": { "type": "string" },
+          "maxItems": 32
+        }
+      },
+      "required": ["engine", "path"],
+      "additionalProperties": false
+    },
+    "limits": {
+      "type": "object",
+      "properties": {
+        "timeoutMs": { "type": "integer", "minimum": 1, "maximum": 600000 },
+        "maxInputBytes": { "type": "integer", "minimum": 1, "maximum": 16777216 },
+        "maxOutputBytes": { "type": "integer", "minimum": 1, "maximum": 16777216 }
+      },
+      "additionalProperties": false
+    },
+    "jsonScalar": {
+      "type": ["string", "number", "boolean", "null"]
+    },
+    "jsonSchema": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "enum": ["object", "array", "string", "number", "integer", "boolean", "null"]
+        },
+        "oneOf": {
+          "type": "array",
+          "minItems": 2,
+          "items": { "$ref": "#/$defs/jsonSchema" }
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/jsonSchema" }
+        },
+        "required": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string" }
+        },
+        "additionalProperties": { "type": "boolean" },
+        "items": { "$ref": "#/$defs/jsonSchema" },
+        "enum": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/jsonScalar" }
+        },
+        "const": { "$ref": "#/$defs/jsonScalar" },
+        "description": { "type": "string" },
+        "title": { "type": "string" },
+        "default": true,
+        "examples": true
+      },
+      "additionalProperties": false
+    }
+  }
+}

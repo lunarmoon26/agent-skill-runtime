@@ -1,0 +1,17 @@
+{
+  "manifestVersion": 1,
+  "name": "bad-skill",
+  "tools": [
+    {
+      "title": "Bad Runtime",
+      "name": "bad_runtime",
+      "description": "Must not escape its skill root.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "entrypoint": { "engine": "node", "path": "../../outside.mjs" }
+    }
+  ]
+}

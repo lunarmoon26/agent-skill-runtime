@@ -1,0 +1,88 @@
+{
+  "name": "@lunarmoon26/agent-skill-runtime",
+  "version": "0.1.0",
+  "description": "Portable JSON-in/JSON-out runtime and harness adapters for executable agent skills",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lunarmoon26/agent-skill-runtime.git"
+  },
+  "homepage": "https://github.com/lunarmoon26/agent-skill-runtime#readme",
+  "bugs": "https://github.com/lunarmoon26/agent-skill-runtime/issues",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist/",
+    "docs/",
+    "skill-runtime.schema.json",
+    "LICENSE",
+    "README.md"
+  ],
+  "bin": {
+    "agent-skill-runtime": "dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./opencode": {
+      "types": "./dist/opencode.d.ts",
+      "import": "./dist/opencode.js"
+    },
+    "./deepseek": {
+      "types": "./dist/deepseek.d.ts",
+      "import": "./dist/deepseek.js"
+    },
+    "./mcp": {
+      "types": "./dist/mcp.d.ts",
+      "import": "./dist/mcp.js"
+    },
+    "./schema": "./skill-runtime.schema.json"
+  },
+  "scripts": {
+    "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
+    "build": "npm run clean && tsc -p tsconfig.json",
+    "test": "npm run build && node --test tests/*.test.mjs",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "pack:check": "npm pack --dry-run",
+    "verify": "npm run test && npm run pack:check",
+    "prepack": "npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "2.0.0",
+    "ajv": "8.20.0",
+    "smol-toml": "1.8.0"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@opencode-ai/plugin": "^1.18.21"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/cordis": {
+      "optional": true
+    },
+    "@opencode-ai/plugin": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@modelcontextprotocol/client": "2.0.0",
+    "@opencode-ai/plugin": "^1.18.21",
+    "@types/node": "^24.3.1",
+    "typescript": "^5.9.2"
+  },
+  "engines": {
+    "node": ">=22.20.0"
+  },
+  "keywords": [
+    "agent",
+    "skills",
+    "mcp",
+    "opencode",
+    "deepseek"
+  ]
+}

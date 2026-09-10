@@ -1,0 +1,133 @@
+{
+  "$schema": "../../../../../skill-runtime.schema.json",
+  "manifestVersion": 1,
+  "name": "echo-skill",
+  "tools": [
+    {
+      "title": "Echo Runtime",
+      "name": "echo_runtime",
+      "description": "Echo a message and selected process context.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string", "description": "Message to echo" }
+        },
+        "required": ["message"],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "echo": { "type": "string" },
+          "cwd": { "type": "string" },
+          "explicitEnvironment": {
+            "oneOf": [{ "type": "string" }, { "type": "null" }]
+          },
+          "hiddenEnvironment": {
+            "oneOf": [{ "type": "string" }, { "type": "null" }]
+          }
+        },
+        "required": ["echo", "cwd", "explicitEnvironment", "hiddenEnvironment"],
+        "additionalProperties": false
+      },
+      "entrypoint": { "engine": "node", "path": "scripts/echo.mjs" },
+      "capabilities": ["filesystem-read"],
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "limits": { "timeoutMs": 5000, "maxInputBytes": 4096, "maxOutputBytes": 4096 }
+    },
+    {
+      "title": "Privileged Runtime",
+      "name": "privileged_runtime",
+      "description": "Exercise explicit write approval.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": { "ok": { "type": "boolean", "const": true } },
+        "required": ["ok"],
+        "additionalProperties": false
+      },
+      "entrypoint": { "engine": "node", "path": "scripts/privileged.mjs" },
+      "capabilities": ["filesystem-write"]
+    },
+    {
+      "title": "Slow Runtime",
+      "name": "slow_runtime",
+      "description": "Wait until cancelled.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "entrypoint": { "engine": "node", "path": "scripts/slow.mjs" },
+      "limits": { "timeoutMs": 5000 }
+    },
+    {
+      "title": "Large Runtime",
+      "name": "large_runtime",
+      "description": "Write more data than the declared output ceiling.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "entrypoint": { "engine": "node", "path": "scripts/large.mjs" },
+      "limits": { "maxOutputBytes": 20 }
+    },
+    {
+      "title": "Newline Runtime",
+      "name": "newline_runtime",
+      "description": "Write JSON without the required trailing newline.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "entrypoint": { "engine": "node", "path": "scripts/newline.mjs" }
+    },
+    {
+      "title": "Scalar Runtime",
+      "name": "scalar_runtime",
+      "description": "Return a declared scalar result.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "outputSchema": { "type": "string" },
+      "entrypoint": { "engine": "node", "path": "scripts/scalar.mjs" }
+    },
+    {
+      "title": "Invalid UTF-8 Runtime",
+      "name": "invalid_utf8_runtime",
+      "description": "Write malformed UTF-8 that would otherwise decode lossily.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "entrypoint": { "engine": "node", "path": "scripts/invalid-utf8.mjs" }
+    },
+    {
+      "title": "Tree Runtime",
+      "name": "tree_runtime",
+      "description": "Start a descendant process for cancellation testing.",
+      "inputSchema": {
+        "type": "object",
+        "properties": { "marker": { "type": "string" } },
+        "required": ["marker"],
+        "additionalProperties": false
+      },
+      "entrypoint": { "engine": "node", "path": "scripts/tree.mjs" },
+      "capabilities": ["filesystem-write", "process"]
+    }
+  ]
+}
