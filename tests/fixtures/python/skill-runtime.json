@@ -1,0 +1,24 @@
+{
+  "$schema": "../../../skill-runtime.schema.json",
+  "manifestVersion": 1,
+  "name": "python-runtime",
+  "tools": [
+    {
+      "title": "Python Runtime",
+      "name": "python_runtime",
+      "description": "Report whether Python UTF-8 mode is enabled.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": { "utf8Mode": { "type": "integer", "const": 1 } },
+        "required": ["utf8Mode"],
+        "additionalProperties": false
+      },
+      "entrypoint": { "engine": "python", "path": "main.py" }
+    }
+  ]
+}

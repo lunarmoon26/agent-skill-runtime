@@ -1,0 +1,17 @@
+{
+  "manifestVersion": 1,
+  "name": "python-uv-skill",
+  "tools": [
+    {
+      "title": "Python UV Runtime",
+      "name": "python_uv_runtime",
+      "description": "Validate pinned PEP 723 metadata.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "entrypoint": { "engine": "python-uv", "path": "main.py" }
+    }
+  ]
+}
