@@ -1,6 +1,6 @@
 {
   "name": "@lunarmoon26/agent-skill-runtime",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Portable JSON-in/JSON-out runtime and harness adapters for executable agent skills",
   "type": "module",
   "license": "MIT",
