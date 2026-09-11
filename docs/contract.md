@@ -18,6 +18,14 @@ Each invocation starts the author-selected entrypoint and sends exactly one JSON
 
 The runtime validates input before starting the process and validates output after strict UTF-8 decoding and JSON parsing. It enforces byte ceilings, a timeout, and caller cancellation. On POSIX, timeout and cancellation terminate the process group even if its leader exits during cleanup. On Windows, the runtime invokes `taskkill /T /F`; version 1 does not provide Job Object containment after the root PID exits, so entrypoints must finish their owned descendants before returning as required above.
 
+## Diagnostic observers
+
+`onDiagnostic` is a best-effort observer of captured stderr during execution and preparation. A callback exception or rejected promise does not replace the operation's result or error. Observer promises are not awaited; diagnostics are not a completion hook. Observer failures are discarded without invoking the observer again. Hosts that need logging-failure reporting handle it inside their observer.
+
+Approval callbacks remain policy decisions: their failure blocks execution. Diagnostic isolation does not roll back script side effects or dependency-cache changes.
+
+See [lifecycle lessons](lifecycle-lessons.md) for the rationale and proposed follow-ups.
+
 ## Engines
 
 - `node` executes a `.js`, `.mjs`, or `.cjs` file with Node. A Bun-based host still launches `node` rather than interpreting the entrypoint with Bun.

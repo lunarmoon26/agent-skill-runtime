@@ -93,6 +93,7 @@ export interface SkillRuntimeOptions {
   approve?: (request: SkillApprovalRequest) => boolean | Promise<boolean>
   environment?: Record<string, string>
   commands?: Partial<Record<SkillEngine, string>>
+  /** Best-effort observer; throws/rejections are ignored and promises are not awaited. */
   onDiagnostic?: (toolName: string, diagnostic: string) => void
 }
 
