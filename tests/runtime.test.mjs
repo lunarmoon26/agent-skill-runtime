@@ -66,6 +66,61 @@ test("executes JSON tools with an allowlisted environment", async () => {
   }
 })
 
+for (const operation of ["execute", "prepare"]) {
+  test(`${operation} preserves outcomes when diagnostic observers throw or reject`, async () => {
+    const root = await mkdtemp(join(tmpdir(), "agent-skill-runtime-observer-"))
+    try {
+      await writeFile(join(root, "package.json"), '{"type":"module"}\n')
+      const script = 'process.stderr.write("operation diagnostic\\n"); process.stdout.write("{}\\n"); process.exitCode = Number(process.env.TEST_EXIT_CODE)\n'
+      await writeFile(join(root, "main.mjs"), script)
+      // Node stands in for uv: `node sync --quiet --script main.py` runs this fixture.
+      await writeFile(join(root, "sync"), script)
+      await writeFile(join(root, "main.py"), '# /// script\n# dependencies = []\n# ///\n')
+      await writeFile(join(root, "skill-runtime.json"), JSON.stringify({
+        manifestVersion: 1,
+        name: "observer-runtime",
+        tools: [{
+          name: "observer_runtime",
+          title: "Observer Runtime",
+          description: "Emit a diagnostic before succeeding or failing.",
+          inputSchema: { type: "object", properties: {}, additionalProperties: false },
+          entrypoint: operation === "prepare"
+            ? { engine: "python-uv", path: "main.py" }
+            : { engine: "node", path: "main.mjs" },
+        }],
+      }))
+      for (const rejects of [false, true]) {
+        for (const exitCode of [0, 7]) {
+          const seen = []
+          const runtime = await createSkillRuntime({
+            pluginRoot: root,
+            commands: { "python-uv": "bun" in process.versions ? "node" : process.execPath },
+            environment: { TEST_EXIT_CODE: String(exitCode) },
+            onDiagnostic(name, diagnostic) {
+              seen.push({ name, diagnostic })
+              const error = new Error("observer failed")
+              if (rejects) return Promise.reject(error)
+              throw error
+            },
+          })
+          const result = operation === "prepare" ? runtime.prepare() : runtime.execute("observer_runtime", {})
+          if (exitCode === 0) {
+            assert.deepEqual(await result, operation === "prepare" ? undefined : {})
+          } else {
+            await assert.rejects(result, (error) => error instanceof SkillExecutionError
+              && error.code === (operation === "prepare" ? "SKILL_PREPARE_FAILED" : "SKILL_EXECUTION_ERROR")
+              && error.message === "operation diagnostic")
+          }
+          await new Promise((resolve) => setImmediate(resolve))
+          assert.deepEqual(seen, [{ name: "observer_runtime", diagnostic: "operation diagnostic" }])
+        }
+      }
+    } finally {
+      await rm(root, { recursive: true, force: true })
+    }
+  })
+}
+
 test("rejects invalid input before execution", async () => {
   const runtime = await createSkillRuntime({ pluginRoot: fixtureRoot })
   await assert.rejects(

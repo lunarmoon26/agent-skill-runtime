@@ -313,6 +313,15 @@ export class SkillRuntime {
     }))
   }
 
+  private notifyDiagnostic(name: string, diagnostic: string): void {
+    if (!diagnostic) return
+    try {
+      void Promise.resolve(this.#options.onDiagnostic?.(name, diagnostic)).catch(() => {})
+    } catch {
+      // Observers cannot replace execution/preparation outcomes or recursively report failures.
+    }
+  }
+
   /** Provision exact PEP 723 dependencies without executing skill entrypoints. */
   async prepare(signal?: AbortSignal): Promise<void> {
     const preparedEntrypoints = new Set<string>()
@@ -331,7 +340,7 @@ export class SkillRuntime {
         signal,
       })
       const diagnostic = result.stderr.toString("utf8").trim()
-      if (diagnostic) this.#options.onDiagnostic?.(prepared.loaded.tool.name, diagnostic)
+      this.notifyDiagnostic(prepared.loaded.tool.name, diagnostic)
       if (result.code !== 0) {
         throw new SkillExecutionError(diagnostic || `uv sync exited with code ${result.code}`, "SKILL_PREPARE_FAILED")
       }
@@ -380,7 +389,7 @@ export class SkillRuntime {
       signal: invocation.signal,
     })
     const diagnostic = result.stderr.toString("utf8").trim()
-    if (diagnostic) this.#options.onDiagnostic?.(name, diagnostic)
+    this.notifyDiagnostic(name, diagnostic)
     if (result.code !== 0) {
       const suffix = result.signal ? `signal ${result.signal}` : `exit code ${result.code}`
       throw new SkillExecutionError(diagnostic || `${name} failed with ${suffix}`)
