@@ -48,7 +48,7 @@ An Agent Plugins `mcp.json` can start the stdio server from its plugin root:
       "command": "npx",
       "args": [
         "-y",
-        "@lunarmoon26/agent-skill-runtime@0.1.0",
+        "@lunarmoon26/agent-skill-runtime@0.1.1",
         "mcp",
         "--root",
         "${PLUGIN_ROOT}"

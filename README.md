@@ -4,7 +4,8 @@
 
 ## Status
 
-This repository contains the version 1 contract and its reference TypeScript implementation. Version `0.1.0` is the initial pre-release.
+This repository contains the version 1 contract and its reference TypeScript
+implementation. Version `0.1.1` is the current pre-release.
 
 ## Quick Start
 
